@@ -11,7 +11,10 @@ public class SoundManager : Singleton<SoundManager>
 
     public void PlayBGM(AudioClip clip)
     {
-        bgmSource.Stop();
+        if (bgmSource.isPlaying)
+        {
+            bgmSource.Stop();
+        }
         bgmSource.clip = clip;
         bgmSource.Play();
     }
@@ -26,9 +29,7 @@ public class SoundManager : Singleton<SoundManager>
 
     public void PlaySFX(AudioClip clip)
     {
-        sfxSource.Stop();
-        sfxSource.clip = clip;
-        sfxSource.Play();
+        sfxSource.PlayOneShot(clip);
     }
 
     public void StopSFX()

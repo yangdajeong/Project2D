@@ -54,6 +54,8 @@ public class SceneManager : Singleton<SceneManager>
             yield return null;
         }
 
+        Manager.UI.EnsureEventSystem();
+
         BaseScene curScene = GetCurScene();
         yield return curScene.LoadingRoutine();
 

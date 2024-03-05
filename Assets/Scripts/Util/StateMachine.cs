@@ -12,18 +12,18 @@ public class StateMachine<T> where T : Enum
         curState.Enter();
     }
 
-    private void Update()
+    public void Update()
     {
         curState.Update();
         curState.Transition();
     }
 
-    private void LateUpdate()
+    public void LateUpdate()
     {
         curState.LateUpdate();
     }
 
-    private void FixedUpdate()
+    public void FixedUpdate()
     {
         curState.FixedUpdate();
     }
