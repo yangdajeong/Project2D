@@ -6,4 +6,6 @@ public static class Extension
     {
         return ((1 << layer) & layerMask) != 0;
     }
+
+
 }

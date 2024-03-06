@@ -13,16 +13,31 @@ public class PlayerMover : MonoBehaviour
     [Header("Property")]
     [SerializeField] float movePower;
     [SerializeField] float brakePower;
+    [SerializeField] float wallJumpPower;
     [SerializeField] float maxXSpeed;
     [SerializeField] float maxYSpeed;
-
     [SerializeField] float jumpSpeed;
+    [SerializeField] float slidingSpeed;
 
-    public Vector2 moveDir;
+
+    [SerializeField] GroundChecker groundChecker;
+    [SerializeField] WallChecker wallChecker;
+
+    private Vector2 moveDir;
+
+    float isRight = 1;
+
 
     private void FixedUpdate()
     {
         Move();
+
+        if(wallChecker.IsWall)
+        {
+            animator.SetBool("Flip", false);
+            //rigid.velocity = new Vector2(rigid.velocity.x, rigid.velocity.y * slidingSpeed);
+
+        }
     }
 
     private void Move()
@@ -65,6 +80,18 @@ public class PlayerMover : MonoBehaviour
         rigid.velocity = velocity;
     }
 
+    private void WallJump()
+    {
+        rigid.velocity = new Vector2(-isRight * wallJumpPower, 0.9f * wallJumpPower);
+        FlipPlayer();
+    }
+
+    void FlipPlayer()
+    {
+        transform.eulerAngles = new Vector3(0, Mathf.Abs(transform.eulerAngles.y - 180), 0);
+        isRight = isRight * -1;
+    }
+
 
     private void OnMove(InputValue value)
     {
@@ -86,11 +113,25 @@ public class PlayerMover : MonoBehaviour
         }
     }
 
+    private bool Flip;
+
     private void OnJump(InputValue value)
     {
-        if(value.isPressed)
+        if(value.isPressed && groundChecker.IsGround) //땅에 있는 상태
         {
             Jump();
         }
+        else if (value.isPressed && wallChecker.IsWall) //벽에 매달린 상태
+        {
+            animator.SetBool("Flip", true);
+            WallJump();
+
+
+        }
     }
+
+
+
+
+
 }
