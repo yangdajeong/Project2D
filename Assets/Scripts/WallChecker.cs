@@ -15,7 +15,6 @@ public class WallChecker : MonoBehaviour
         if (WallCheckLayer.Contain(collision.gameObject.layer))
         {
             {
-
                 groundCount++;
                 isWall = groundCount > 0;
                 animator.SetBool("IsWall", isWall);

@@ -1,66 +1,91 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class StateMachine<T> where T : Enum
+public class StateMachine : MonoBehaviour
 {
-    private Dictionary<T, BaseState<T>> stateDic = new Dictionary<T, BaseState<T>>();
-    private BaseState<T> curState;
+    private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
+    private BaseState curState;
 
-    public void Start(T startState)
+    private void Start()
     {
-        curState = stateDic[startState];
         curState.Enter();
     }
 
-    public void Update()
+    private void Update()
     {
         curState.Update();
         curState.Transition();
     }
 
-    public void LateUpdate()
+    private void LateUpdate()
     {
         curState.LateUpdate();
     }
 
-    public void FixedUpdate()
+    private void FixedUpdate()
     {
         curState.FixedUpdate();
     }
 
-    public void AddState(T stateEnum, BaseState<T> state)
+    public void InitState(string stateName)
     {
-        state.SetStateMachine(this);
-        stateDic.Add(stateEnum, state);
+        curState = stateDic[stateName];
     }
 
-    public void ChangeState(T stateEnum)
+    public void AddState(string stateName, BaseState state)
+    {
+        state.SetStateMachine(this);
+        stateDic.Add(stateName, state);
+    }
+
+    public void ChangeState(string stateName)
     {
         curState.Exit();
-        curState = stateDic[stateEnum];
+        curState = stateDic[stateName];
         curState.Enter();
+    }
+
+    public void InitState<T>(T stateType) where T : Enum
+    {
+        InitState(stateType.ToString());
+    }
+
+    public void AddState<T>(T stateType, BaseState state) where T : Enum
+    {
+        AddState(stateType.ToString(), state);
+    }
+
+    public void ChangeState<T>(T stateType) where T : Enum
+    {
+        ChangeState(stateType.ToString());
     }
 }
 
-public class BaseState<T> where T : Enum
+public class BaseState
 {
-    private StateMachine<T> stateMachine;
+    private StateMachine stateMachine;
 
-    public void SetStateMachine(StateMachine<T> stateMachine)
+    public void SetStateMachine(StateMachine stateMachine)
     {
         this.stateMachine = stateMachine;
     }
 
-    protected void ChangeState(T stateEnum)
+    protected void ChangeState(string stateName)
     {
-        stateMachine.ChangeState(stateEnum);
+        stateMachine.ChangeState(stateName);
+    }
+
+    protected void ChangeState<T>(T stateType) where T : Enum
+    {
+        ChangeState(stateType.ToString());
     }
 
     public virtual void Enter() { }
-    public virtual void Exit() { }
     public virtual void Update() { }
     public virtual void LateUpdate() { }
     public virtual void FixedUpdate() { }
+    public virtual void Exit() { }
 
     public virtual void Transition() { }
 }
