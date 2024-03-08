@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerMover : MonoBehaviour
@@ -21,23 +22,40 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] float StayWallJumpTime;
     [SerializeField] float RollTime;
 
+
     [Header("Checker")]
     [SerializeField] GroundChecker groundChecker;
     [SerializeField] WallChecker wallChecker;
 
     private bool isWallJump;
     private bool isRoll;
-    private bool doubleRollStop = true;
 
     private float isRight = 1;
 
     private Vector2 moveDir;
 
+    private WeaponParent weaponParent;
+
+
+    private void Awake()
+    {
+        weaponParent = GetComponentInChildren<WeaponParent>();
+    }
+
+
+    private void OnPointerPosition(InputValue value)
+    {
+        Vector2 pointerInput = value.Get<Vector2>();
+        weaponParent.PointerPosition = pointerInput;
+
+    }
 
 
 
     private void FixedUpdate()
     {
+
+
         Move();
 
         // 홀수 점프 시 방향반전 방지
@@ -154,8 +172,6 @@ public class PlayerMover : MonoBehaviour
         yield return new WaitForSeconds(RollTime);
         animator.SetBool("IsRoll", false);
 
-        doubleRollStop = true;
-
     }
 
 
@@ -196,12 +212,10 @@ public class PlayerMover : MonoBehaviour
 
     private void OnRoll(InputValue value)
     {
-        
-        if (value.isPressed && doubleRollStop)
-        {
-            doubleRollStop = false;
-            isRoll = true;
 
+        if (value.isPressed)
+        {
+            isRoll = true;
         }
     }
 

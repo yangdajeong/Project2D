@@ -4,15 +4,34 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    //[SerializeField] Animator animator;
+    //[SerializeField] float TraceSpeed;
+    //[SerializeField] float findRange;
+    //[SerializeField] float WalkSpeed;
+    //[SerializeField] Transform WalkPosStart;
+    //[SerializeField] Transform WalkPosPosEnd;
+    //[SerializeField] SpriteRenderer render;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    //private StateMachine stateMachine;
+    //public Transform target;
+    //private Vector2 startPos;
+
+    //private void Start()
+    //{
+    //    animator = GetComponent<Animator>();
+    //    target = GameObject.FindGameObjectWithTag("Player").transform;
+    //}
+
+    //public void DirectionEnemy(float target, float baseobj)
+    //{
+    //    if(target < baseobj) 
+    //    {
+    //        animator.SetFloat("Direction", -1);
+    //    }
+    //    else
+    //    {
+    //        animator.SetFloat("Direction", -1);
+    //    }
+
+    //}
 }

@@ -8,7 +8,8 @@ public class PlayerOneWayPlatform : MonoBehaviour
 
     private GameObject currentOneWayPlatform;
 
-    [SerializeField] private CapsuleCollider2D playerCollider;
+    [SerializeField] private BoxCollider2D playerCollider;
+
 
     private void OnRoll(InputValue value)
     {
@@ -20,7 +21,7 @@ public class PlayerOneWayPlatform : MonoBehaviour
 
     private void Roll()
     {
-        if(currentOneWayPlatform != null) 
+        if(currentOneWayPlatform != null   ) 
         {
             StartCoroutine(DisableCollision());
         }
