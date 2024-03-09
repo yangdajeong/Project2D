@@ -34,21 +34,6 @@ public class PlayerMover : MonoBehaviour
 
     private Vector2 moveDir;
 
-    private WeaponParent weaponParent;
-
-
-    private void Awake()
-    {
-        weaponParent = GetComponentInChildren<WeaponParent>();
-    }
-
-
-    private void OnPointerPosition(InputValue value)
-    {
-        Vector2 pointerInput = value.Get<Vector2>();
-        weaponParent.PointerPosition = pointerInput;
-
-    }
 
 
 

@@ -14,7 +14,7 @@ public class Grunt : Enemy
     [SerializeField] Transform WalkPosPosEnd;
     [SerializeField] SpriteRenderer render;
     [SerializeField] Rigidbody2D rigid;
-        [SerializeField] float idleDuration = 3f; // 타겟을 놓친 후 대기할 시간
+    [SerializeField] float idleDuration = 3f; // 타겟을 놓친 후 대기할 시간
 
 
     private StateMachine stateMachine;
