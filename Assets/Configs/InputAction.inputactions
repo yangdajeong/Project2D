@@ -33,18 +33,9 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Attack",
-                    "type": "Button",
-                    "id": "ab6637aa-576d-4f1f-81b4-2299d0d7f0c4",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "ClickAttack",
                     "type": "Button",
-                    "id": "d18fa2eb-ff46-471e-b00f-97a91f36d906",
+                    "id": "21363c28-cec6-48f2-8c2b-b35b55a756e5",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -109,18 +100,7 @@
                 },
                 {
                     "name": "",
-                    "id": "587e3656-3556-44e2-9d99-2511883498bb",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Attack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a781ab03-2e09-4d1e-a8d0-68edfae31ff9",
+                    "id": "b414fa63-3635-4b78-a6d3-02bdb1c31612",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
@@ -130,6 +110,12 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Attack",
+            "id": "242a5913-7c59-4b16-a365-36cc8d7b5231",
+            "actions": [],
+            "bindings": []
         }
     ],
     "controlSchemes": []

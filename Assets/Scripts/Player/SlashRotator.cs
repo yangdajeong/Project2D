@@ -5,21 +5,15 @@ using UnityEngine.InputSystem;
 
 public class SlashRotator : MonoBehaviour
 {
+    //private Vector2 dirVec;
 
-
-
-    private Camera _camera;
-
-    private void Start()
-    {
-        _camera = Camera.main;
-    }
+    //public Vector2 DirVec {  get { return dirVec; } }
 
 
 
     private void Update()
     {
-        Vector2 mousePos = (Vector2)_camera.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mousePos = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 dirVec = mousePos - (Vector2)transform.position; //마우스가 바라보는 방향을 나타내는 벡터
 
         transform.right = (Vector3)dirVec.normalized;

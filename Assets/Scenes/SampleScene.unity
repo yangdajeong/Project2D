@@ -623,8 +623,8 @@ GameObject:
   - component: {fileID: 344903094}
   - component: {fileID: 344903097}
   - component: {fileID: 344903098}
-  - component: {fileID: 344903100}
   - component: {fileID: 344903099}
+  - component: {fileID: 344903100}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -876,8 +876,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 246bd3c333733204aa7d1035c62428bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 1309329045}
-  Weapon: {fileID: 1309329040}
+  WeaponAnimator: {fileID: 1309329045}
+  PlayerAnimator: {fileID: 344903093}
+  Weapon: {fileID: 0}
+  WeaponTransform: {fileID: 1309329041}
 --- !u!1 &373780820
 GameObject:
   m_ObjectHideFlags: 0
@@ -1170,7 +1172,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: -0.021718679, y: 0.067081116, z: 0.001460551, w: 0.9975101}
-  m_LocalPosition: {x: -2.7379823, y: -1.0984248, z: -10.158592}
+  m_LocalPosition: {x: -5.1243467, y: -1.8729239, z: -9.802126}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1915,14 +1917,13 @@ GameObject:
   - component: {fileID: 1309329041}
   - component: {fileID: 1309329044}
   - component: {fileID: 1309329045}
-  - component: {fileID: 1309329046}
   m_Layer: 3
   m_Name: Weapon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1309329041
 Transform:
   m_ObjectHideFlags: 0
@@ -1979,7 +1980,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 10
-  m_Sprite: {fileID: 21300000, guid: 884b5921d19553947b1d344f153655ac, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1987,7 +1988,7 @@ SpriteRenderer:
   m_Size: {x: 0.94, y: 0.38}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!95 &1309329045
@@ -2011,18 +2012,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1309329046
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1309329040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93810814853395145844084d9c56ef6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1462912423
 GameObject:
   m_ObjectHideFlags: 3
