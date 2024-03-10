@@ -51,6 +51,7 @@ public class PlayerAttack : MonoBehaviour
         transform.Translate(dirVec.normalized);
 
     }
+    
 
     public void NotIsAttack()
     {
