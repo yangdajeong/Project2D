@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StateMachine : MonoBehaviour
+public class StateMachine : MonoBehaviour, IDamagable
 {
     private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
     private BaseState curState;

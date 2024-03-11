@@ -2,8 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IDamagable
 {
+    public void Died()
+    {
+
+    }
+
+
+
+
+
+
+
     //[SerializeField] Animator animator;
     //[SerializeField] float TraceSpeed;
     //[SerializeField] float findRange;

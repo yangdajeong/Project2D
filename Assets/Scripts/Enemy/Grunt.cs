@@ -2,7 +2,7 @@
 using UnityEngine;
 
 
-public class Grunt : Enemy
+public class Grunt : Enemy, IDamagable
 {
     public enum State { Idle, Walk, Trace, Return, Attack, Died }
 
@@ -24,7 +24,10 @@ public class Grunt : Enemy
     private static bool turn;
 
 
-
+    public void Died()
+    {
+        Debug.Log("Á×À½");
+    }
 
 
     private void Awake()
@@ -59,7 +62,7 @@ public class Grunt : Enemy
         //}
     }
 
-    private class GruntState : BaseState
+    private class GruntState : BaseState, IDamagable
     {
         protected Grunt owner;
         protected Transform transform => owner.transform;
@@ -87,7 +90,7 @@ public class Grunt : Enemy
 
 
 
-    private class IdleState : GruntState
+    private class IdleState : GruntState, IDamagable
     {
         public IdleState(Grunt owner) : base(owner) { }
 
@@ -112,7 +115,7 @@ public class Grunt : Enemy
 
 
 
-    private class WalkState : GruntState
+    private class WalkState : GruntState, IDamagable
     {
         public WalkState(Grunt owner) : base(owner) { }
 
@@ -153,7 +156,7 @@ public class Grunt : Enemy
     }
 
 
-    private class TraceState : GruntState
+    private class TraceState : GruntState, IDamagable
     {
         public TraceState(Grunt owner) : base(owner) { }
 
@@ -171,8 +174,10 @@ public class Grunt : Enemy
             {
                 render.flipX = false;
             }
-
         }
+
+        
+
 
         public override void Transition()
         {
@@ -216,6 +221,11 @@ public class Grunt : Enemy
     private class DiedState : GruntState
     {
         public DiedState(Grunt owner) : base(owner) { }
+
+        public void Died()
+        {
+            Debug.Log("Á×À½ ½ºÅ×ÀÌÆ®");
+        }
     }
 
 

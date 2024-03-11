@@ -798,12 +798,14 @@ MonoBehaviour:
   movePower: 20
   brakePower: 30
   wallJumpPower: 9
-  maxXSpeed: 6
+  maxXSpeed: 8
   maxYSpeed: 10
   jumpSpeed: 10
   slidingSpeed: -0.5
   StayWallJumpTime: 0.5
   RollTime: 0.3
+  RollSpeed: 12
+  RollMaxSpeed: 12
   groundChecker: {fileID: 246037373}
   wallChecker: {fileID: 1568882225}
 --- !u!114 &344903098
@@ -878,8 +880,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WeaponAnimator: {fileID: 1309329045}
   PlayerAnimator: {fileID: 344903093}
-  Weapon: {fileID: 0}
+  PlayerRenderer: {fileID: 344903091}
   WeaponTransform: {fileID: 1309329041}
+  rigid: {fileID: 344903090}
+  AttackPower: 10
+  XmaxSpeed: 1
+  YmaxSpeed: 7
+  ClickCoolTime: 0.3
+  range: 2
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &373780820
 GameObject:
   m_ObjectHideFlags: 0
@@ -1171,8 +1182,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.021718679, y: 0.067081116, z: 0.001460551, w: 0.9975101}
-  m_LocalPosition: {x: -4.719696, y: -1.078812, z: -9.891708}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.3563123, y: -0.65187, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1400,7 +1411,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 976036905}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.021718679, y: 0.067081116, z: 0.001460551, w: 0.9975101}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.8, y: -1.442, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1932,7 +1943,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1309329040}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1985,7 +1996,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.94, y: 0.38}
+  m_Size: {x: 0.31, y: 0.19}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0

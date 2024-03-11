@@ -21,7 +21,8 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] float slidingSpeed;
     [SerializeField] float StayWallJumpTime;
     [SerializeField] float RollTime;
-
+    [SerializeField] float RollSpeed;
+    [SerializeField] float RollMaxSpeed;
 
     [Header("Checker")]
     [SerializeField] GroundChecker groundChecker;
@@ -39,6 +40,18 @@ public class PlayerMover : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //마우스 공격과 반대방향으로 뛸 때 버그 방어함수
+        if (moveDir.x < 0)
+        {
+            render.flipX = true;
+            animator.SetBool("Run", true);
+        }
+        else if (moveDir.x > 0)
+        {
+            render.flipX = false;
+            animator.SetBool("Run", true);
+        }
+
 
 
         Move();
@@ -70,10 +83,11 @@ public class PlayerMover : MonoBehaviour
 
     private void Move()
     {
+
         // 벽을 탔을 때 이동 잠시 멈춤
         if (!isWallJump)
         {
-
+            //왼쪽
             if (moveDir.x < 0 && rigid.velocity.x > -maxXSpeed)
             {
                 rigid.AddForce(Vector2.right * moveDir.x * movePower);
@@ -81,13 +95,22 @@ public class PlayerMover : MonoBehaviour
                 //앞으로 가면 구르기
                 if(isRoll)
                 {
+                    rigid.AddForce(Vector2.right * moveDir.x * RollSpeed, ForceMode2D.Impulse);
                     isRoll = false;
                     Roll();
 
+                    // 구르기 x최대 속력
+
+                    if (rigid.velocity.x < -RollMaxSpeed)
+                    {
+                        rigid.velocity = new Vector2(-RollMaxSpeed, rigid.velocity.y);
+                    }
+
                 }
-
-
             }
+
+
+            //오른쪽
             else if (moveDir.x > 0 && rigid.velocity.x < maxXSpeed)
             {
                 rigid.AddForce(Vector2.right * moveDir.x * movePower);
@@ -95,8 +118,15 @@ public class PlayerMover : MonoBehaviour
                 //뒤로 가면 구르기
                 if (isRoll)
                 {
+                    rigid.AddForce(Vector2.right * moveDir.x * RollSpeed, ForceMode2D.Impulse);
                     isRoll = false;
                     Roll();
+
+                    // 구르기 x최대 속력
+                    if (rigid.velocity.x > RollMaxSpeed)
+                    {
+                        rigid.velocity = new Vector2(RollMaxSpeed, rigid.velocity.y);
+                    }
 
                 }
             }
@@ -165,7 +195,8 @@ public class PlayerMover : MonoBehaviour
     {
         moveDir = value.Get<Vector2>();
 
-        if(moveDir.x < 0) 
+
+        if (moveDir.x < 0) 
         {
             render.flipX = true;
             animator.SetBool("Run", true);
@@ -180,6 +211,10 @@ public class PlayerMover : MonoBehaviour
             animator.SetBool("Run", false);
         }
     }
+
+
+    
+
 
     private void OnJump(InputValue value)
     {
@@ -203,7 +238,4 @@ public class PlayerMover : MonoBehaviour
             isRoll = true;
         }
     }
-
-
-
 }
