@@ -409,14 +409,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 240041949}
-  TraceSpeed: 7
-  findRange: 5
-  WalkSpeed: 3
   WalkPosStart: {fileID: 1228488541}
   WalkPosPosEnd: {fileID: 914502607}
   render: {fileID: 240041950}
   rigid: {fileID: 240041954}
-  idleDuration: 3
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 256
+  TraceSpeed: 7
+  WalkSpeed: 3
+  range: 5
+  angle: 30
 --- !u!61 &240041953
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -887,7 +893,7 @@ MonoBehaviour:
   XmaxSpeed: 1
   YmaxSpeed: 7
   ClickCoolTime: 0.3
-  range: 2
+  range: 1.5
   layerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -1183,7 +1189,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.3563123, y: -0.65187, z: -10}
+  m_LocalPosition: {x: -1.3630674, y: -0.65184, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

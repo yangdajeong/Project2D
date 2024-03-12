@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour, IDamagable
+public  class Enemy : MonoBehaviour, IDamagable
 {
-    public void Died()
+    public virtual void Died()
     {
 
     }

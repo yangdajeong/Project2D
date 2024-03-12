@@ -123,17 +123,23 @@ public class PlayerAttack : MonoBehaviour
     }
 
 
-    Collider[] colliders = new Collider[20];
+    //오버랩
+    Collider2D[] colliders = new Collider2D[20];
     private void AttackTiming()
     {
-        Debug.Log("타이밍");
-        int size = Physics.OverlapSphereNonAlloc(transform.position, range, colliders, layerMask);
-        Debug.Log(size);
+        int size = Physics2D.OverlapCircleNonAlloc(transform.position, range, colliders, layerMask);
         for (int i = 0; i < size; i++) 
         {
-            Debug.Log("1");
+            //시야각
+            Vector2 dirToTarget = (colliders[i].transform.position - transform.position).normalized;
+            //if (Vector2.Angle(transform.forward, dirToTarget) > 90)
+            //    continue;
+
+            //내적 이용
+            if (Vector2.Dot(transform.forward, dirToTarget) > 90)
+                continue;
+
             IDamagable damagable = colliders[i].GetComponent<IDamagable>();
-            
             damagable?.Died();
             
         }
@@ -145,6 +151,7 @@ public class PlayerAttack : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, range);   
+
     }
 
 

@@ -4,8 +4,5 @@ using UnityEngine;
 
 public interface IDamagable
 {
-    public void Died()
-    {
-
-    }
+    public abstract void Died();
 }

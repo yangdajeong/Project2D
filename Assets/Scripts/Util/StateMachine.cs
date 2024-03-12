@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
-public class StateMachine : MonoBehaviour, IDamagable
+public class StateMachine : MonoBehaviour
 {
     private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
     private BaseState curState;
@@ -60,6 +61,7 @@ public class StateMachine : MonoBehaviour, IDamagable
     {
         ChangeState(stateType.ToString());
     }
+
 }
 
 public class BaseState
