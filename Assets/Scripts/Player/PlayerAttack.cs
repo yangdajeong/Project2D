@@ -23,6 +23,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] LayerMask layerMask;
 
     private Vector2 dirVec;
+    public Vector2 DirVec { get { return dirVec; } }
 
     private bool ableClick = true;
 
@@ -33,7 +34,6 @@ public class PlayerAttack : MonoBehaviour
 
 
 
-
     private void OnClickAttack(InputValue value)
     {
         ClickAttack();
@@ -41,6 +41,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void ClickAttack()
     {
+
         if (ableClick)
         {
             WeaponAnimator.SetTrigger("IsSlash");
@@ -51,6 +52,7 @@ public class PlayerAttack : MonoBehaviour
 
             Vector2 mousePos = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 dirVec = mousePos - (Vector2)transform.position; //마우스가 바라보는 방향을 나타내는 벡터
+
             
             //마우스를 따라다니는 공격 이펙트
             WeaponTransform.transform.right = (Vector3)dirVec.normalized;
@@ -125,6 +127,7 @@ public class PlayerAttack : MonoBehaviour
 
     //오버랩
     Collider2D[] colliders = new Collider2D[20];
+
     private void AttackTiming()
     {
         int size = Physics2D.OverlapCircleNonAlloc(transform.position, range, colliders, layerMask);
