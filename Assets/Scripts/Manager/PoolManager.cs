@@ -5,6 +5,13 @@ public class PoolManager : Singleton<PoolManager>
 {
     private Dictionary<int, ObjectPool> poolDic = new Dictionary<int, ObjectPool>();
 
+    public ObjectPool GetObjectPool()
+    {
+        // 필요한 로직을 구현하여 ObjectPool 인스턴스를 반환합니다.
+        // 이 예시에서는 임시로 ObjectPool을 생성하여 반환합니다.
+        return new ObjectPool();
+    }
+
     public void CreatePool(PooledObject prefab, int size, int capacity)
     {
         GameObject gameObject = new GameObject();

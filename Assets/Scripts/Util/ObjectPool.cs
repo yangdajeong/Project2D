@@ -3,11 +3,19 @@ using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
 {
-    [SerializeField] PooledObject prefab;
+    public PooledObject prefab;
     [SerializeField] int size;
     [SerializeField] int capacity;
 
     private Stack<PooledObject> objectPool;
+
+
+
+    private void Awake()
+    {
+        CreatePool(this.prefab, this.size, this.capacity);
+    }
+
 
     public void CreatePool(PooledObject prefab, int size, int capacity)
     {
@@ -44,6 +52,8 @@ public class ObjectPool : MonoBehaviour
             instance.transform.rotation = rotation;
             return instance;
         }
+
+
     }
 
     public void ReturnPool(PooledObject instance)

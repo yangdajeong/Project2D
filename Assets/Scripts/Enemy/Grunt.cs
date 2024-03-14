@@ -22,7 +22,9 @@ public class Grunt : Enemy
     [SerializeField] float WalkSpeed;
     [SerializeField] float range;
     [SerializeField] float angle;
-    [SerializeField] float idleDuration; // 타겟을 놓친 후 대기할 시간
+    [SerializeField] float hitPower;
+    [SerializeField] float XmaxHitPower;
+    [SerializeField] float YmaxHitPower;
 
     private StateMachine stateMachine;
     private Transform target;
@@ -31,6 +33,7 @@ public class Grunt : Enemy
     private static bool turn;
     private bool IsFindTarget;
     private float currentAngle;
+
 
 
 
@@ -147,9 +150,7 @@ public class Grunt : Enemy
     }
 
 
-
-
-public override void Died()
+    public override void Died()
     {
         stateMachine.ChangeState(State.Died);
     }
@@ -170,8 +171,10 @@ public override void Died()
         protected SpriteRenderer render => owner.render;
         protected Rigidbody2D rigid => owner.rigid;
         protected bool IsFindTarget => owner.IsFindTarget;
-        protected float idleDuration => owner.idleDuration;
         protected PlayerAttack playerAttack => owner.playerAttack;
+        protected float hitPower => owner.hitPower;
+        protected float XmaxHitPower => owner.XmaxHitPower;
+        protected float YmaxHitPower => owner.YmaxHitPower;
 
 
 
@@ -197,7 +200,6 @@ public override void Died()
         public override void Update()
         {
             owner.FindTarget();
-            Debug.Log(IsFindTarget);
 
         }
 
@@ -205,7 +207,7 @@ public override void Died()
         {
             if (!owner.IsObstacleBlocking())
             {
-                Debug.Log("아이들에서 트레이스");
+
                 animator.SetBool("IsIdle", false);
                 animator.SetBool("IsFollow", true);
                 ChangeState(State.Trace);
@@ -255,7 +257,7 @@ public override void Died()
         {
             if (IsFindTarget && Vector2.Distance(target.position, transform.position) < range)
             {
-                Debug.Log("워크에서 트레이스");
+
                 animator.SetBool("IsFollow", true);
                 ChangeState(State.Trace);
 
@@ -292,7 +294,7 @@ public override void Died()
         {
             if (Vector2.Distance(target.position, transform.position) > range)
             {
-                Debug.Log("트레이스에서 아이들");
+
                 animator.SetBool("IsFollow", false);
                 ChangeState(State.Idle);
 
@@ -308,15 +310,54 @@ public override void Died()
     {
         public DiedState(Grunt owner) : base(owner) { }
 
+        private bool isDied;
+
         public override void Enter()
         {
-            Debug.Log("다이 스테이트");
 
-            rigid.AddForce(owner.playerAttack.DirVec.normalized * 10, ForceMode2D.Impulse);
-            //rigid.AddForce(transform.right * 10, ForceMode2D.Impulse);
+
+            if (!isDied)
+            {
+                rigid.AddForce(playerAttack.DirVec * hitPower, ForceMode2D.Impulse);
+                isDied = true;
+            }
+
+            //공격받아서 날라가는 y 최대 속력
+
+            // x최대 속력
+            if (rigid.velocity.x < -XmaxHitPower)
+            {
+                rigid.velocity = new Vector2(-XmaxHitPower, rigid.velocity.y);
+            }
+            else if (rigid.velocity.x > XmaxHitPower)
+            {
+                rigid.velocity = new Vector2(XmaxHitPower, rigid.velocity.y);
+            }
+
+
+            // y최대 속력
+            if (rigid.velocity.y < -YmaxHitPower)
+            {
+                rigid.velocity = new Vector2(rigid.velocity.x, -YmaxHitPower);
+            }
+            else if (rigid.velocity.y > YmaxHitPower)
+            {
+                rigid.velocity = new Vector2(rigid.velocity.x, YmaxHitPower);
+            }
+
+            animator.SetBool("DiedGround", true);
 
         }
 
+        public override void Update()
+        {
+            animator.SetFloat("YSpeed", rigid.velocity.y);
+
+            if (rigid.velocity.y > 1f)
+            {
+                animator.SetBool("DiedGround", false);
+            }
+        }
     }
 
 

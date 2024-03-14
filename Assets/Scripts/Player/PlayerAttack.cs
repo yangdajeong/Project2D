@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class PlayerAttack : MonoBehaviour
 {
     [Header("Component")]
@@ -11,6 +12,9 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] SpriteRenderer PlayerRenderer;
     [SerializeField] Transform WeaponTransform;
     [SerializeField] Rigidbody2D rigid;
+    [SerializeField] ObjectPool pooler;
+    [SerializeField] Transform firePoint;
+
 
     [Header("Property")]
     [SerializeField] float AttackPower;
@@ -25,12 +29,32 @@ public class PlayerAttack : MonoBehaviour
     private Vector2 dirVec;
     public Vector2 DirVec { get { return dirVec; } }
 
+
     private bool ableClick = true;
 
     private void Awake()
     {
-        
+        pooler = PoolManager.Instance.GetObjectPool();
     }
+
+    //private void Awake()
+    //{
+
+    //    pooler = PoolManager.Instance.GetObjectPool(); // pooler를 PoolManager.Instance로 초기화
+
+    //    PoolManager의 CreatePool 메서드를 호출하여 ObjectPool을 생성 및 초기화
+    //    PoolManager.Instance.CreatePool(prefab, size, capacity);
+    //}
+
+    //private void Awake()
+    //{
+
+    //// PoolManager의 CreatePool 메서드를 호출하여 ObjectPool을 생성 및 초기화합니다.
+    //PoolManager.Instance.CreatePool(pooler.prefab, pooler.size, pooler.capacity);
+
+    //// pooler를 PoolManager.Instance로 초기화
+    //pooler = PoolManager.Instance.GetObjectPool();
+    //}
 
 
 
@@ -51,9 +75,9 @@ public class PlayerAttack : MonoBehaviour
 
 
             Vector2 mousePos = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 dirVec = mousePos - (Vector2)transform.position; //마우스가 바라보는 방향을 나타내는 벡터
+            dirVec = mousePos - (Vector2)transform.position; //마우스가 바라보는 방향을 나타내는 벡터
 
-            
+
             //마우스를 따라다니는 공격 이펙트
             WeaponTransform.transform.right = (Vector3)dirVec.normalized;
             Vector2 scale = transform.localScale;
@@ -96,7 +120,7 @@ public class PlayerAttack : MonoBehaviour
             }
 
 
-            // 공격 이펙트 방향 전환
+            // 공격 이펙트 이미지 방향 전환
             if (dirVec.x < 0)
             {
                 PlayerRenderer.flipX = true;
@@ -105,7 +129,9 @@ public class PlayerAttack : MonoBehaviour
             {
                 PlayerRenderer.flipX = false;
             }
+
         }
+
 
     }
     
@@ -144,7 +170,14 @@ public class PlayerAttack : MonoBehaviour
 
             IDamagable damagable = colliders[i].GetComponent<IDamagable>();
             damagable?.Died();
-            
+
+            //Rigidbody2D rigid = colliders[i].GetComponent<Rigidbody2D>();
+            //if (rigid != null)
+            //{
+            //    rigid.AddForce(dirVec * 10, ForceMode2D.Impulse);
+            //}
+
+
         }
     
     }
