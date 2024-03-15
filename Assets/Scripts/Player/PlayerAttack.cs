@@ -13,7 +13,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] Transform WeaponTransform;
     [SerializeField] Rigidbody2D rigid;
     [SerializeField] ObjectPool pooler;
-    [SerializeField] Transform firePoint;
+    [SerializeField] HitEffect hitEffect;
 
 
     [Header("Property")]
@@ -35,26 +35,9 @@ public class PlayerAttack : MonoBehaviour
     private void Awake()
     {
         pooler = PoolManager.Instance.GetObjectPool();
+        //hitEffect = HitEffect.Instance.GetHitEffect();
     }
 
-    //private void Awake()
-    //{
-
-    //    pooler = PoolManager.Instance.GetObjectPool(); // pooler를 PoolManager.Instance로 초기화
-
-    //    PoolManager의 CreatePool 메서드를 호출하여 ObjectPool을 생성 및 초기화
-    //    PoolManager.Instance.CreatePool(prefab, size, capacity);
-    //}
-
-    //private void Awake()
-    //{
-
-    //// PoolManager의 CreatePool 메서드를 호출하여 ObjectPool을 생성 및 초기화합니다.
-    //PoolManager.Instance.CreatePool(pooler.prefab, pooler.size, pooler.capacity);
-
-    //// pooler를 PoolManager.Instance로 초기화
-    //pooler = PoolManager.Instance.GetObjectPool();
-    //}
 
 
 
@@ -171,13 +154,12 @@ public class PlayerAttack : MonoBehaviour
             IDamagable damagable = colliders[i].GetComponent<IDamagable>();
             damagable?.Died();
 
-            //Rigidbody2D rigid = colliders[i].GetComponent<Rigidbody2D>();
-            //if (rigid != null)
-            //{
-            //    rigid.AddForce(dirVec * 10, ForceMode2D.Impulse);
-            //}
+            // 적에게 힛 이펙트 생성하기
+            //Vector3 hitEffectPosition = colliders[i].transform.position;
+            //Vector3 hitEffectDirection = (hitEffectPosition - transform.position).normalized;
 
 
+            hitEffect?.CreateHitEffect();
         }
     
     }
@@ -188,12 +170,6 @@ public class PlayerAttack : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, range);   
 
-    }
-
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        
     }
 
 }

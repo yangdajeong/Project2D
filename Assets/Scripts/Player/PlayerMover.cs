@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class PlayerMover : MonoBehaviour
+public class PlayerMover : MonoBehaviour, IDamagable
 {
     [Header("Component")]
     [SerializeField] Rigidbody2D rigid;
@@ -237,5 +237,10 @@ public class PlayerMover : MonoBehaviour
         {
             isRoll = true;
         }
+    }
+
+    public void Died()
+    {
+        Debug.Log("플레이어 다이");
     }
 }

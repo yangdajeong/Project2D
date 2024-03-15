@@ -406,8 +406,10 @@ MonoBehaviour:
   range: 5
   angle: 45
   hitPower: 5
-  XmaxHitPower: 8
-  YmaxHitPower: 10
+  xFallDownPower: 8
+  yFallDownPower: 10
+  AttackCoolTime: 0
+  AttackRange: 1
 --- !u!61 &240041953
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -740,7 +742,6 @@ Transform:
   - {fileID: 246037370}
   - {fileID: 1568882221}
   - {fileID: 1309329041}
-  - {fileID: 1940899297}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &344903093
@@ -898,7 +899,7 @@ MonoBehaviour:
   WeaponTransform: {fileID: 1309329041}
   rigid: {fileID: 344903090}
   pooler: {fileID: 1090900685}
-  firePoint: {fileID: 1940899297}
+  hitEffect: {fileID: 344903101}
   AttackPower: 10
   XmaxSpeed: 1
   YmaxSpeed: 7
@@ -921,8 +922,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerAttack: {fileID: 344903100}
   pooler: {fileID: 1090900685}
-  Speed: 7
-  mainCamera: {fileID: 519420031}
+  Speed: 2
 --- !u!1 &373780820
 GameObject:
   m_ObjectHideFlags: 0
@@ -1215,7 +1215,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.3605607, y: -0.65185, z: -10}
+  m_LocalPosition: {x: -1.365474, y: -0.65182996, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1572,7 +1572,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da2a566b8db847742b23431816c27c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: -3799762496928976868, guid: e1c6be8207b4ada41ad9fd2c9e064636, type: 3}
+  prefab: {fileID: 6320235278637195168, guid: e1c6be8207b4ada41ad9fd2c9e064636, type: 3}
   size: 10
   capacity: 10
 --- !u!1 &1102655171
@@ -2333,7 +2333,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: ce01df5bd09e89f449cd402862d2463a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -2820,37 +2820,6 @@ Transform:
   - {fileID: 1228488541}
   - {fileID: 914502607}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1940899296
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1940899297}
-  m_Layer: 3
-  m_Name: FirePoint
-  m_TagString: FirePoint
-  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1940899297
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1940899296}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 344903092}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1963783519
 GameObject:

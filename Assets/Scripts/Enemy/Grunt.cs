@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -23,8 +24,12 @@ public class Grunt : Enemy
     [SerializeField] float range;
     [SerializeField] float angle;
     [SerializeField] float hitPower;
-    [SerializeField] float XmaxHitPower;
-    [SerializeField] float YmaxHitPower;
+    [SerializeField] float xFallDownPower;
+    [SerializeField] float yFallDownPower;
+
+    [Header("AttackProperty")]
+    [SerializeField] float AttackCoolTime;
+    [SerializeField] float AttackRange;
 
     private StateMachine stateMachine;
     private Transform target;
@@ -32,6 +37,7 @@ public class Grunt : Enemy
 
     private static bool turn;
     private bool IsFindTarget;
+    private static bool AttackStopMove;
     private float currentAngle;
 
 
@@ -55,24 +61,17 @@ public class Grunt : Enemy
         startPos = transform.position;
     }
 
-    private void Update()
+    private void AttackStop()
     {
-
-
-            //Debug.Log(playerAttack.DirVec);
-        
+        AttackStopMove = true;
+        animator.SetBool("IsAttack", false);
     }
 
-    
     private bool IsObstacleBlocking()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, target.position - transform.position, range, obstacleMask);
         return hit.collider != null;
     }
-
-
-
-
 
 
     Collider2D[] colliders = new Collider2D[20];
@@ -132,6 +131,11 @@ public class Grunt : Enemy
         Gizmos.DrawLine(transform.position, transform.position + startDir * range);
         Gizmos.DrawLine(transform.position, transform.position + endDir * range);
 
+
+        //공격범위
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, AttackRange);
+
     }
 
     private Vector3 AngleToDir(float angle)
@@ -150,6 +154,40 @@ public class Grunt : Enemy
     }
 
 
+    //공격 오버랩
+    private List<Collider2D> detectedEnemies = new List<Collider2D>(); // 적을 감지한 목록을 저장할 리스트
+
+    private bool AttackRader()
+    {
+        detectedEnemies.Clear(); // 목록 초기화
+
+        int size = Physics2D.OverlapCircleNonAlloc(transform.position, AttackRange, colliders, layerMask);
+        for (int i = 0; i < size; i++)
+        {
+            // 시야각 계산
+            Vector2 dirToTarget = (colliders[i].transform.position - transform.position).normalized;
+            if (Vector2.Dot(transform.forward, dirToTarget) <= 90)
+            {
+                detectedEnemies.Add(colliders[i]); // 시야각 내에 적이 감지된 경우 목록에 추가
+                return true;
+            }
+        }
+
+        return false; // 감지된 적이 있는지 여부 반환
+    }
+
+    private void AttackTiming()
+    {
+        foreach (var enemy in detectedEnemies)
+        {
+            IDamagable damagable = enemy.GetComponent<IDamagable>();
+            damagable?.Died();
+        }
+    }
+
+
+
+
     public override void Died()
     {
         stateMachine.ChangeState(State.Died);
@@ -162,7 +200,7 @@ public class Grunt : Enemy
 
         protected float WalkSpeed => owner.WalkSpeed;
         protected float TraceSpeed => owner.TraceSpeed;
-        protected float range => owner.range;
+        protected float TraceRange => owner.range;
         protected Transform target => owner.target;
         protected Vector2 startPos => owner.startPos;
         protected Animator animator => owner.animator;
@@ -173,8 +211,10 @@ public class Grunt : Enemy
         protected bool IsFindTarget => owner.IsFindTarget;
         protected PlayerAttack playerAttack => owner.playerAttack;
         protected float hitPower => owner.hitPower;
-        protected float XmaxHitPower => owner.XmaxHitPower;
-        protected float YmaxHitPower => owner.YmaxHitPower;
+        protected float XmaxHitPower => owner.xFallDownPower;
+        protected float YmaxHitPower => owner.yFallDownPower;
+        protected float AttackRange => owner.AttackRange;
+        //protected LayerMask layerMask => owner.layerMask;
 
 
 
@@ -213,6 +253,12 @@ public class Grunt : Enemy
                 ChangeState(State.Trace);
             }
 
+            else if (owner.AttackRader())
+            {
+                animator.SetBool("IsIdle", false);
+                ChangeState(State.Attack);
+
+            }
         }
     }
 
@@ -255,7 +301,7 @@ public class Grunt : Enemy
 
         public override void Transition()
         {
-            if (IsFindTarget && Vector2.Distance(target.position, transform.position) < range)
+            if (IsFindTarget && Vector2.Distance(target.position, transform.position) < TraceRange)
             {
 
                 animator.SetBool("IsFollow", true);
@@ -273,7 +319,6 @@ public class Grunt : Enemy
 
         public override void Update()
         {
-           //Debug.Log(Vector2.Distance(target.position, transform.position));
 
             Vector2 dir = (target.position - transform.position).normalized;
             transform.Translate(dir * TraceSpeed * Time.deltaTime, Space.World);
@@ -286,17 +331,24 @@ public class Grunt : Enemy
                 render.flipX = false;
             }
 
-        }
 
+
+        }
 
 
         public override void Transition()
         {
-            if (Vector2.Distance(target.position, transform.position) > range)
+            if (Vector2.Distance(target.position, transform.position) > TraceRange + 1)
             {
 
                 animator.SetBool("IsFollow", false);
                 ChangeState(State.Idle);
+
+            }
+            else if (owner.AttackRader())
+            {
+                animator.SetBool("IsFollow", false);
+                ChangeState(State.Attack);
 
             }
         }
@@ -314,7 +366,7 @@ public class Grunt : Enemy
 
         public override void Enter()
         {
-
+            animator.SetBool("Dead", true);
 
             if (!isDied)
             {
@@ -353,16 +405,46 @@ public class Grunt : Enemy
         {
             animator.SetFloat("YSpeed", rigid.velocity.y);
 
-            if (rigid.velocity.y > 1f)
+            if (rigid.velocity.y > 3f)
             {
                 animator.SetBool("DiedGround", false);
             }
         }
     }
 
+    private IEnumerator AttackCoroutine()
+    {
+
+        yield return new WaitForSeconds(5f);
+        stateMachine.ChangeState(State.Idle);
+    }
+
 
     private class AttackState : GruntState
     {
         public AttackState(Grunt owner) : base(owner) { }
+
+
+
+        public override void Enter()
+        {
+            animator.SetBool("IsAttack", true);
+            AttackStopMove = false;
+            // 공격 코루틴을 시작합니다.
+            owner.StartCoroutine(owner.AttackCoroutine());
+        }
+
+        public override void Transition()
+        {
+            if (Vector2.Distance(target.position, transform.position) > AttackRange && AttackStopMove)
+            {
+                Debug.Log("어택레인지에서 벗어남");
+                animator.SetBool("IsAttack", false);
+                animator.SetBool("IsFollow", true);
+                ChangeState(State.Trace);
+
+            }
+        }
+
     }
 }
