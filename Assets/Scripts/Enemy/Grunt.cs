@@ -37,7 +37,8 @@ public class Grunt : Enemy
 
     private static bool turn;
     private bool IsFindTarget;
-    private static bool AttackStopMove;
+    private static bool AttackCoolTimeBool = false;
+    private static bool AttackAbleMove = false;
     private float currentAngle;
 
 
@@ -63,7 +64,8 @@ public class Grunt : Enemy
 
     private void AttackStop()
     {
-        AttackStopMove = true;
+        Debug.Log("AttackAbleMove = true;");
+        //AttackAbleMove = true;
         animator.SetBool("IsAttack", false);
     }
 
@@ -214,6 +216,7 @@ public class Grunt : Enemy
         protected float XmaxHitPower => owner.xFallDownPower;
         protected float YmaxHitPower => owner.yFallDownPower;
         protected float AttackRange => owner.AttackRange;
+
         //protected LayerMask layerMask => owner.layerMask;
 
 
@@ -340,13 +343,16 @@ public class Grunt : Enemy
         {
             if (Vector2.Distance(target.position, transform.position) > TraceRange + 1)
             {
-
+                //시야 범위
+                Debug.Log("시야 범위");
                 animator.SetBool("IsFollow", false);
                 ChangeState(State.Idle);
 
             }
             else if (owner.AttackRader())
             {
+                //공격 범위
+                Debug.Log("공격 범위");
                 animator.SetBool("IsFollow", false);
                 ChangeState(State.Attack);
 
@@ -405,7 +411,7 @@ public class Grunt : Enemy
         {
             animator.SetFloat("YSpeed", rigid.velocity.y);
 
-            if (rigid.velocity.y > 3f)
+            if (rigid.velocity.y > 5f)
             {
                 animator.SetBool("DiedGround", false);
             }
@@ -414,9 +420,13 @@ public class Grunt : Enemy
 
     private IEnumerator AttackCoroutine()
     {
+        animator.SetBool("IsAttack", true);
+        AttackAbleMove = false;
+        animator.SetBool("IsIdle", true);
+        yield return new WaitForSeconds(2f);
+        animator.SetBool("IsIdle", false);
 
-        yield return new WaitForSeconds(5f);
-        stateMachine.ChangeState(State.Idle);
+        stateMachine.ChangeState(State.Attack);
     }
 
 
@@ -424,27 +434,56 @@ public class Grunt : Enemy
     {
         public AttackState(Grunt owner) : base(owner) { }
 
+        private bool AttackRangeOut; // 범위 안에 있는가
+        private bool CoroutineStarted; // Coroutine이 이미 시작되었는지 여부
+
+        //AttackAbleMove //공격할때는 이동못하게 막기
 
 
         public override void Enter()
         {
-            animator.SetBool("IsAttack", true);
-            AttackStopMove = false;
-            // 공격 코루틴을 시작합니다.
-            owner.StartCoroutine(owner.AttackCoroutine());
+            animator.SetBool("IsIdle", false);
+            AttackAbleMove = true;
+
+            CoroutineStarted = false; // Coroutine이 시작되지 않았음을 초기화
+
+            // Coroutine 시작 조건 확인
+            CheckCoroutineStart();
+
         }
 
+        public override void Update()
+        {
+            // 플레이어가 공격 범위를 벗어나면 AttackRangeOut 값을 true로 설정
+            AttackRangeOut = Vector2.Distance(target.position, transform.position) > AttackRange + 1;
+
+            // Coroutine 시작 조건 확인
+            CheckCoroutineStart();
+        }
+
+        private void CheckCoroutineStart()
+    
+        {
+            // Coroutine이 시작되지 않았고, 공격 가능 상태이며, 공격 범위 안에 있을 때
+            if (!CoroutineStarted && AttackAbleMove && !AttackRangeOut)
+            {
+                owner.StartCoroutine(owner.AttackCoroutine());
+                CoroutineStarted = true; // Coroutine이 시작되었음을 표시
+            }
+        }
+
+        
         public override void Transition()
         {
-            if (Vector2.Distance(target.position, transform.position) > AttackRange && AttackStopMove)
+            if (AttackRangeOut && AttackAbleMove)
             {
-                Debug.Log("어택레인지에서 벗어남");
                 animator.SetBool("IsAttack", false);
                 animator.SetBool("IsFollow", true);
                 ChangeState(State.Trace);
 
             }
         }
-
     }
+
+
 }
