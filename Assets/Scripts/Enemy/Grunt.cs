@@ -16,6 +16,10 @@ public class Grunt : Enemy
     [SerializeField] LayerMask layerMask;
     [SerializeField] LayerMask obstacleMask;
     [SerializeField] PlayerAttack playerAttack;
+    [SerializeField] HitEffect hitEffect;
+    [SerializeField] ShakeCamera shakeCamera;
+    [SerializeField] Transform WeaponTransform;
+    [SerializeField] Animator WeaponAnimator;
 
 
     [Header("Property")]
@@ -28,7 +32,6 @@ public class Grunt : Enemy
     [SerializeField] float yFallDownPower;
 
     [Header("AttackProperty")]
-    [SerializeField] float AttackCoolTime;
     [SerializeField] float AttackRange;
 
     private StateMachine stateMachine;
@@ -36,11 +39,10 @@ public class Grunt : Enemy
     private Vector2 startPos;
 
     private static bool turn;
-    private bool IsFindTarget;
-    private static bool AttackCoolTimeBool = false;
     private static bool AttackAbleMove = false;
     private float currentAngle;
-
+    private static Vector2 gruntDirVec;
+    public Vector2 GruntDirVec { get { return gruntDirVec; } }
 
 
 
@@ -60,12 +62,12 @@ public class Grunt : Enemy
     {
         target = GameObject.FindWithTag("Player").transform;
         startPos = transform.position;
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player"); // "Player" 태그로 플레이어를 찾음
+
     }
 
     private void AttackStop()
     {
-        Debug.Log("AttackAbleMove = true;");
-        //AttackAbleMove = true;
         animator.SetBool("IsAttack", false);
     }
 
@@ -76,13 +78,26 @@ public class Grunt : Enemy
     }
 
 
-    Collider2D[] colliders = new Collider2D[20];
-
-    private void FindTarget()
+    private void AttackTiming()
     {
 
+        shakeCamera.Shake();
 
-        IsFindTarget = false;
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player"); // "Player" 태그로 플레이어를 찾음
+
+        if (playerObject != null)
+        {
+            IDamagable damagable = playerObject.GetComponent<IDamagable>(); // 플레이어의 IDamagable 컴포넌트를 가져옴
+
+            damagable?.Died();
+            
+        }
+
+    }
+
+
+    private bool FindTarget()
+    {
 
         Collider2D[] targetsInView = Physics2D.OverlapCircleAll(transform.position, range, layerMask);
 
@@ -101,22 +116,67 @@ public class Grunt : Enemy
                 if (hit.collider == null || hit.collider.gameObject == targetInView.gameObject) // 장애물이 없는지 확인
                 {
                     Debug.DrawRay(transform.position, dirToTarget * range, Color.red);
-                    IsFindTarget = true;
-                    break; // 이미 타겟이 발견되었으므로 추가 검색은 불필요
+                    return true;
                 }
             }
 
         }
+
+
+
+
         // 그런트의 시야각을 계산한 후 필드에 저장
         currentAngle = angle;
         if (render.flipX)
         {
             currentAngle *= -1;
         }
+
+        return false;
+    }
+
+
+    private bool AttackTarget()
+    {
+
+        Collider2D[] targetsInView = Physics2D.OverlapCircleAll(transform.position, AttackRange, layerMask);
+
+
+        foreach (Collider2D targetInView in targetsInView)
+        {
+            Vector2 dirToTarget = (targetInView.transform.position - transform.position).normalized;
+            //그런트가 플립되었을때 시야각도 플립
+            Vector2 referenceDir = render.flipX ? -transform.right : transform.right;
+
+            float angleToTarget = Vector2.Angle(referenceDir, dirToTarget);
+
+            if (angleToTarget <= angle) // 시야각 내에 있는지 확인
+            {
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToTarget, AttackRange, obstacleMask);
+                if (hit.collider == null || hit.collider.gameObject == targetInView.gameObject) // 장애물이 없는지 확인
+                {
+                    Debug.DrawRay(transform.position, dirToTarget * range, Color.red);
+                    return true;
+                }
+            }
+
+        }
+
+
+
+        // 그런트의 시야각을 계산한 후 필드에 저장
+        currentAngle = angle;
+        if (render.flipX)
+        {
+            currentAngle *= -1;
+        }
+
+        return false;
     }
 
     private void OnDrawGizmosSelected()
     {
+        //시야범위
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere(transform.position, range);
 
@@ -134,8 +194,28 @@ public class Grunt : Enemy
         Gizmos.DrawLine(transform.position, transform.position + endDir * range);
 
 
+
+
         //공격범위
+        Gizmos.color = Color.black;
+        Gizmos.DrawWireSphere(transform.position, AttackRange);
+
+        // 시작 각도와 끝 각도를 계산합니다.
+        float AttackStartAngle = transform.eulerAngles.z - currentAngle; // 시작 각도
+        float AttackEndAngle = transform.eulerAngles.z + currentAngle; // 끝 각도
+
+        // 호(arc)의 시작 및 끝점을 계산합니다.
+        Vector3 AttackStartDir = AngleToDir(AttackStartAngle);
+        Vector3 AttackEndDir = AngleToDir(AttackEndAngle);
+
+        // 호(arc)를 그립니다.
         Gizmos.color = Color.blue;
+        Gizmos.DrawLine(transform.position, transform.position + AttackStartDir * AttackRange);
+        Gizmos.DrawLine(transform.position, transform.position + AttackEndDir * AttackRange);
+
+
+        //공격범위
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, AttackRange);
 
     }
@@ -156,36 +236,29 @@ public class Grunt : Enemy
     }
 
 
-    //공격 오버랩
-    private List<Collider2D> detectedEnemies = new List<Collider2D>(); // 적을 감지한 목록을 저장할 리스트
+    ////공격 오버랩
+    //private List<Collider2D> detectedEnemies = new List<Collider2D>(); // 적을 감지한 목록을 저장할 리스트
 
-    private bool AttackRader()
-    {
-        detectedEnemies.Clear(); // 목록 초기화
+    //private bool AttackRader()
+    //{
+    //    detectedEnemies.Clear(); // 목록 초기화
 
-        int size = Physics2D.OverlapCircleNonAlloc(transform.position, AttackRange, colliders, layerMask);
-        for (int i = 0; i < size; i++)
-        {
-            // 시야각 계산
-            Vector2 dirToTarget = (colliders[i].transform.position - transform.position).normalized;
-            if (Vector2.Dot(transform.forward, dirToTarget) <= 90)
-            {
-                detectedEnemies.Add(colliders[i]); // 시야각 내에 적이 감지된 경우 목록에 추가
-                return true;
-            }
-        }
+    //    int size = Physics2D.OverlapCircleNonAlloc(transform.position, AttackRange, colliders, layerMask);
+    //    for (int i = 0; i < size; i++)
+    //    {
+    //        // 시야각 계산
+    //        Vector2 dirToTarget = (colliders[i].transform.position - transform.position).normalized;
+    //        if (Vector2.Dot(transform.forward, dirToTarget) <= 90)
+    //        {
+    //            detectedEnemies.Add(colliders[i]); // 시야각 내에 적이 감지된 경우 목록에 추가
+    //            return true;
+    //        }
+    //    }
 
-        return false; // 감지된 적이 있는지 여부 반환
-    }
+    //    return false; // 감지된 적이 있는지 여부 반환
+    //}
 
-    private void AttackTiming()
-    {
-        foreach (var enemy in detectedEnemies)
-        {
-            IDamagable damagable = enemy.GetComponent<IDamagable>();
-            damagable?.Died();
-        }
-    }
+
 
 
 
@@ -210,12 +283,12 @@ public class Grunt : Enemy
         protected Transform WalkPosPosEnd => owner.WalkPosPosEnd;
         protected SpriteRenderer render => owner.render;
         protected Rigidbody2D rigid => owner.rigid;
-        protected bool IsFindTarget => owner.IsFindTarget;
         protected PlayerAttack playerAttack => owner.playerAttack;
         protected float hitPower => owner.hitPower;
         protected float XmaxHitPower => owner.xFallDownPower;
         protected float YmaxHitPower => owner.yFallDownPower;
         protected float AttackRange => owner.AttackRange;
+        protected HitEffect hitEffect => owner.hitEffect;
 
         //protected LayerMask layerMask => owner.layerMask;
 
@@ -256,7 +329,7 @@ public class Grunt : Enemy
                 ChangeState(State.Trace);
             }
 
-            else if (owner.AttackRader())
+            else if (owner.AttackTarget())
             {
                 animator.SetBool("IsIdle", false);
                 ChangeState(State.Attack);
@@ -304,7 +377,7 @@ public class Grunt : Enemy
 
         public override void Transition()
         {
-            if (IsFindTarget && Vector2.Distance(target.position, transform.position) < TraceRange)
+            if (owner.FindTarget() && Vector2.Distance(target.position, transform.position) < TraceRange)
             {
 
                 animator.SetBool("IsFollow", true);
@@ -344,15 +417,13 @@ public class Grunt : Enemy
             if (Vector2.Distance(target.position, transform.position) > TraceRange + 1)
             {
                 //시야 범위
-                Debug.Log("시야 범위");
                 animator.SetBool("IsFollow", false);
                 ChangeState(State.Idle);
 
             }
-            else if (owner.AttackRader())
+            else if (owner.AttackTarget())
             {
                 //공격 범위
-                Debug.Log("공격 범위");
                 animator.SetBool("IsFollow", false);
                 ChangeState(State.Attack);
 
@@ -367,16 +438,18 @@ public class Grunt : Enemy
     private class DiedState : GruntState
     {
         public DiedState(Grunt owner) : base(owner) { }
-
         private bool isDied;
 
         public override void Enter()
         {
             animator.SetBool("Dead", true);
 
+
+
             if (!isDied)
             {
                 rigid.AddForce(playerAttack.DirVec * hitPower, ForceMode2D.Impulse);
+                hitEffect?.CreateHitEffect();
                 isDied = true;
             }
 
@@ -409,6 +482,7 @@ public class Grunt : Enemy
 
         public override void Update()
         {
+
             animator.SetFloat("YSpeed", rigid.velocity.y);
 
             if (rigid.velocity.y > 5f)
@@ -418,13 +492,15 @@ public class Grunt : Enemy
         }
     }
 
+
+
     private IEnumerator AttackCoroutine()
     {
         animator.SetBool("IsAttack", true);
+        WeaponAnimator.SetTrigger("IsSlash");
+        WeaponTransform.transform.right = (Vector3)gruntDirVec.normalized;
         AttackAbleMove = false;
-        animator.SetBool("IsIdle", true);
-        yield return new WaitForSeconds(2f);
-        animator.SetBool("IsIdle", false);
+        yield return new WaitForSeconds(0.8f);
 
         stateMachine.ChangeState(State.Attack);
     }
@@ -434,7 +510,7 @@ public class Grunt : Enemy
     {
         public AttackState(Grunt owner) : base(owner) { }
 
-        private bool AttackRangeOut; // 범위 안에 있는가
+        //private bool AttackRangeOut; // 범위 안에 있는가
         private bool CoroutineStarted; // Coroutine이 이미 시작되었는지 여부
 
         //AttackAbleMove //공격할때는 이동못하게 막기
@@ -454,8 +530,11 @@ public class Grunt : Enemy
 
         public override void Update()
         {
-            // 플레이어가 공격 범위를 벗어나면 AttackRangeOut 값을 true로 설정
-            AttackRangeOut = Vector2.Distance(target.position, transform.position) > AttackRange + 1;
+            Vector2 dirToTarget = (target.transform.position - transform.position).normalized;
+
+            gruntDirVec = dirToTarget - (Vector2)transform.position;
+
+            owner.AttackTarget();
 
             // Coroutine 시작 조건 확인
             CheckCoroutineStart();
@@ -465,7 +544,7 @@ public class Grunt : Enemy
     
         {
             // Coroutine이 시작되지 않았고, 공격 가능 상태이며, 공격 범위 안에 있을 때
-            if (!CoroutineStarted && AttackAbleMove && !AttackRangeOut)
+            if (!CoroutineStarted && AttackAbleMove && owner.AttackTarget())
             {
                 owner.StartCoroutine(owner.AttackCoroutine());
                 CoroutineStarted = true; // Coroutine이 시작되었음을 표시
@@ -475,7 +554,7 @@ public class Grunt : Enemy
         
         public override void Transition()
         {
-            if (AttackRangeOut && AttackAbleMove)
+            if (!owner.AttackTarget() && AttackAbleMove)
             {
                 animator.SetBool("IsAttack", false);
                 animator.SetBool("IsFollow", true);

@@ -10,6 +10,8 @@ public class PlayerMover : MonoBehaviour, IDamagable
     [SerializeField] Rigidbody2D rigid;
     [SerializeField] SpriteRenderer render;
     [SerializeField] Animator animator;
+    [SerializeField] PlayerAttack playerAttack;
+    [SerializeField] Grunt grunt;
 
     [Header("Property")]
     [SerializeField] float movePower;
@@ -23,6 +25,11 @@ public class PlayerMover : MonoBehaviour, IDamagable
     [SerializeField] float RollTime;
     [SerializeField] float RollSpeed;
     [SerializeField] float RollMaxSpeed;
+
+    [Header("DiedProperty")]
+    [SerializeField] float xFallDownPower;
+    [SerializeField] float yFallDownPower;
+    [SerializeField] float hitPower;
 
     [Header("Checker")]
     [SerializeField] GroundChecker groundChecker;
@@ -74,6 +81,7 @@ public class PlayerMover : MonoBehaviour, IDamagable
             //rigid.velocity = new Vector2(rigid.velocity.x, rigid.velocity.y * slidingSpeed);
 
         }
+
     }
 
     private void FreezeX()
@@ -239,8 +247,52 @@ public class PlayerMover : MonoBehaviour, IDamagable
         }
     }
 
-    public void Died()
+
+    private bool isDied;
+
+    public virtual void Died()
     {
         Debug.Log("플레이어 다이");
+
+    
+        animator.SetBool("IsDied", true);
+
+
+
+        if (!isDied)
+        {
+            rigid.AddForce(grunt.GruntDirVec * hitPower, ForceMode2D.Impulse);
+            //hitEffect?.CreateHitEffect();
+            isDied = true;
+        }
+
+        //공격받아서 날라가는 y 최대 속력
+
+        // x최대 속력
+        if (rigid.velocity.x < -xFallDownPower)
+        {
+            rigid.velocity = new Vector2(-xFallDownPower, rigid.velocity.y);
+        }
+        else if (rigid.velocity.x > xFallDownPower)
+        {
+            rigid.velocity = new Vector2(xFallDownPower, rigid.velocity.y);
+        }
+
+
+        // y최대 속력
+        if (rigid.velocity.y < -yFallDownPower)
+        {
+            rigid.velocity = new Vector2(rigid.velocity.x, -yFallDownPower);
+        }
+        else if (rigid.velocity.y > yFallDownPower)
+        {
+            rigid.velocity = new Vector2(rigid.velocity.x, yFallDownPower);
+        }
+
+
     }
+
+
 }
+
+    

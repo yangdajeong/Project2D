@@ -13,7 +13,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] Transform WeaponTransform;
     [SerializeField] Rigidbody2D rigid;
     [SerializeField] ObjectPool pooler;
-    [SerializeField] HitEffect hitEffect;
+
 
 
     [Header("Property")]
@@ -22,9 +22,16 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] float YmaxSpeed;
     [SerializeField] float ClickCoolTime;
 
+    //[Header("AttackCameraProperty")]
+    //[SerializeField] float shakeTime;
+    //[SerializeField] float intensity;
+
     [Header("Vector")]
     [SerializeField] float range;
     [SerializeField] LayerMask layerMask;
+
+    [SerializeField] Grunt grunt;
+    [SerializeField] ShakeCamera shakeCamera;
 
     private Vector2 dirVec;
     public Vector2 DirVec { get { return dirVec; } }
@@ -35,10 +42,15 @@ public class PlayerAttack : MonoBehaviour
     private void Awake()
     {
         pooler = PoolManager.Instance.GetObjectPool();
-        //hitEffect = HitEffect.Instance.GetHitEffect();
+
+        shakeCamera = FindObjectOfType<ShakeCamera>(); // FindObjectOfType는 검색을 수행하므로 사용에 주의해야 합니다.
+        if (shakeCamera == null)
+        {
+            Debug.LogError("ShakeCamera를 찾을 수 없습니다!");
+        }
     }
 
-
+    
 
 
     private void OnClickAttack(InputValue value)
@@ -55,6 +67,8 @@ public class PlayerAttack : MonoBehaviour
 
 
             PlayerAnimator.SetBool("IsAttack", true);
+
+
 
 
             Vector2 mousePos = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -142,6 +156,9 @@ public class PlayerAttack : MonoBehaviour
         int size = Physics2D.OverlapCircleNonAlloc(transform.position, range, colliders, layerMask);
         for (int i = 0; i < size; i++) 
         {
+            // 카메라를 흔들도록 ShakeCamera에 흔들림 명령을 내립니다.
+            shakeCamera.Shake();
+
             //시야각
             Vector2 dirToTarget = (colliders[i].transform.position - transform.position).normalized;
             //if (Vector2.Angle(transform.forward, dirToTarget) > 90)
@@ -154,22 +171,18 @@ public class PlayerAttack : MonoBehaviour
             IDamagable damagable = colliders[i].GetComponent<IDamagable>();
             damagable?.Died();
 
-            // 적에게 힛 이펙트 생성하기
-            //Vector3 hitEffectPosition = colliders[i].transform.position;
-            //Vector3 hitEffectDirection = (hitEffectPosition - transform.position).normalized;
-
-
-            hitEffect?.CreateHitEffect();
+            
         }
     
     }
+
+
 
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, range);   
-
     }
 
 }
