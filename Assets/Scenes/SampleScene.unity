@@ -303,6 +303,7 @@ GameObject:
   - component: {fileID: 240041954}
   - component: {fileID: 240041953}
   - component: {fileID: 240041955}
+  - component: {fileID: 240041956}
   m_Layer: 6
   m_Name: Grunt
   m_TagString: Untagged
@@ -406,6 +407,8 @@ MonoBehaviour:
   shakeCamera: {fileID: 519420034}
   WeaponTransform: {fileID: 1687521747}
   WeaponAnimator: {fileID: 1687521749}
+  playerMover: {fileID: 344903097}
+  pooler: {fileID: 1090900685}
   TraceSpeed: 7
   WalkSpeed: 3
   range: 5
@@ -507,6 +510,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &240041956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240041948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72eca2979a20005409ac1d774300b8fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerAttack: {fileID: 344903100}
+  pooler: {fileID: 1090900685}
+  Speed: 10
+  grunt: {fileID: 240041952}
 --- !u!1 &246037369
 GameObject:
   m_ObjectHideFlags: 0
@@ -641,9 +660,9 @@ GameObject:
   - component: {fileID: 344903094}
   - component: {fileID: 344903097}
   - component: {fileID: 344903098}
-  - component: {fileID: 344903099}
   - component: {fileID: 344903100}
   - component: {fileID: 344903101}
+  - component: {fileID: 344903099}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -827,9 +846,9 @@ MonoBehaviour:
   RollTime: 0.3
   RollSpeed: 12
   RollMaxSpeed: 12
-  xFallDownPower: 8
-  yFallDownPower: 10
-  hitPower: 5
+  xFallDownPower: 20
+  yFallDownPower: 15
+  hitPower: 30
   groundChecker: {fileID: 246037373}
   wallChecker: {fileID: 1568882225}
 --- !u!114 &344903098
@@ -933,6 +952,7 @@ MonoBehaviour:
   playerAttack: {fileID: 344903100}
   pooler: {fileID: 1090900685}
   Speed: 2
+  grunt: {fileID: 240041952}
 --- !u!1 &373780820
 GameObject:
   m_ObjectHideFlags: 0
@@ -2113,7 +2133,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.31, y: 0.19}
+  m_Size: {x: 0.74, y: 0.18}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -2842,7 +2862,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687521746}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2895,7 +2915,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2, y: 2}
+  m_Size: {x: 0.39, y: 0.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0

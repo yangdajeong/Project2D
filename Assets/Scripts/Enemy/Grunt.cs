@@ -20,7 +20,8 @@ public class Grunt : Enemy
     [SerializeField] ShakeCamera shakeCamera;
     [SerializeField] Transform WeaponTransform;
     [SerializeField] Animator WeaponAnimator;
-
+    [SerializeField] PlayerMover playerMover;
+    [SerializeField] ObjectPool pooler;
 
     [Header("Property")]
     [SerializeField] float TraceSpeed;
@@ -38,17 +39,20 @@ public class Grunt : Enemy
     private Transform target;
     private Vector2 startPos;
 
-    private static bool turn;
-    private static bool AttackAbleMove = false;
+    private bool turn;
+    private bool AttackAbleMove = false;
     private float currentAngle;
-    private static Vector2 gruntDirVec;
+    private Vector2 gruntDirVec;
     public Vector2 GruntDirVec { get { return gruntDirVec; } }
-
+    private  bool isDied;
+    public bool IsDied { get { return isDied; } }
 
 
 
     private void Awake()
     {
+        pooler = PoolManager.Instance.GetObjectPool();
+
         stateMachine = gameObject.AddComponent<StateMachine>();
         stateMachine.AddState(State.Idle, new IdleState(this));
         stateMachine.AddState(State.Trace, new TraceState(this));
@@ -66,6 +70,8 @@ public class Grunt : Enemy
 
     }
 
+
+
     private void AttackStop()
     {
         animator.SetBool("IsAttack", false);
@@ -77,11 +83,18 @@ public class Grunt : Enemy
         return hit.collider != null;
     }
 
+    private void AttackEffectTiming()
+    {
+        WeaponAnimator.SetTrigger("IsSlash");
+    }
 
     private void AttackTiming()
     {
+        hitEffect.GrundCreateHitEffect();
 
         shakeCamera.Shake();
+
+
 
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player"); // "Player" 태그로 플레이어를 찾음
 
@@ -90,7 +103,7 @@ public class Grunt : Enemy
             IDamagable damagable = playerObject.GetComponent<IDamagable>(); // 플레이어의 IDamagable 컴포넌트를 가져옴
 
             damagable?.Died();
-            
+
         }
 
     }
@@ -230,33 +243,12 @@ public class Grunt : Enemy
             angle += 180f;
         }
 
-            float radian = angle * Mathf.Deg2Rad;
-            return new Vector3(Mathf.Cos(radian), Mathf.Sin(radian), 0); // 2D 환경에서는 z 값은 0으로 설정합니다.
-        
+        float radian = angle * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Cos(radian), Mathf.Sin(radian), 0); // 2D 환경에서는 z 값은 0으로 설정합니다.
+
     }
 
 
-    ////공격 오버랩
-    //private List<Collider2D> detectedEnemies = new List<Collider2D>(); // 적을 감지한 목록을 저장할 리스트
-
-    //private bool AttackRader()
-    //{
-    //    detectedEnemies.Clear(); // 목록 초기화
-
-    //    int size = Physics2D.OverlapCircleNonAlloc(transform.position, AttackRange, colliders, layerMask);
-    //    for (int i = 0; i < size; i++)
-    //    {
-    //        // 시야각 계산
-    //        Vector2 dirToTarget = (colliders[i].transform.position - transform.position).normalized;
-    //        if (Vector2.Dot(transform.forward, dirToTarget) <= 90)
-    //        {
-    //            detectedEnemies.Add(colliders[i]); // 시야각 내에 적이 감지된 경우 목록에 추가
-    //            return true;
-    //        }
-    //    }
-
-    //    return false; // 감지된 적이 있는지 여부 반환
-    //}
 
 
 
@@ -289,6 +281,10 @@ public class Grunt : Enemy
         protected float YmaxHitPower => owner.yFallDownPower;
         protected float AttackRange => owner.AttackRange;
         protected HitEffect hitEffect => owner.hitEffect;
+        protected Transform WeaponTransform => owner.WeaponTransform;
+        protected Animator WeaponAnimator => owner.WeaponAnimator;
+        protected PlayerMover playerMover => owner.playerMover;
+
 
         //protected LayerMask layerMask => owner.layerMask;
 
@@ -354,7 +350,7 @@ public class Grunt : Enemy
 
             // 적의 이동 방향을 가져옵니다.
             Vector2 dir;
-            if (turn)
+            if (owner.turn)
                 dir = (WalkPosStart.position - transform.position).normalized;
             else
                 dir = (WalkPosPosEnd.position - transform.position).normalized;
@@ -367,12 +363,12 @@ public class Grunt : Enemy
             transform.Translate(movement, Space.World);
 
             // 적이 도착지점에 도달하면 방향을 변경합니다.
-            if ((turn && Vector2.Distance(WalkPosStart.position, transform.position) < 1) ||
-                (!turn && Vector2.Distance(WalkPosPosEnd.position, transform.position) < 1))
+            if ((owner.turn && Vector2.Distance(WalkPosStart.position, transform.position) < 1) ||
+                (!owner.turn && Vector2.Distance(WalkPosPosEnd.position, transform.position) < 1))
             {
-                turn = !turn;
+                owner.turn = !owner.turn;
             }
-            
+
         }
 
         public override void Transition()
@@ -438,19 +434,22 @@ public class Grunt : Enemy
     private class DiedState : GruntState
     {
         public DiedState(Grunt owner) : base(owner) { }
-        private bool isDied;
+
 
         public override void Enter()
         {
+
+            Debug.Log("그런트 다이");
+
             animator.SetBool("Dead", true);
 
 
 
-            if (!isDied)
+            if (!owner.isDied)
             {
                 rigid.AddForce(playerAttack.DirVec * hitPower, ForceMode2D.Impulse);
                 hitEffect?.CreateHitEffect();
-                isDied = true;
+                owner.isDied = true;
             }
 
             //공격받아서 날라가는 y 최대 속력
@@ -482,7 +481,7 @@ public class Grunt : Enemy
 
         public override void Update()
         {
-
+            //Debug.Log("");
             animator.SetFloat("YSpeed", rigid.velocity.y);
 
             if (rigid.velocity.y > 5f)
@@ -496,13 +495,66 @@ public class Grunt : Enemy
 
     private IEnumerator AttackCoroutine()
     {
-        animator.SetBool("IsAttack", true);
-        WeaponAnimator.SetTrigger("IsSlash");
+
+
+        Debug.Log("코루틴");
+        Vector2 dirToTarget = (Vector2)(target.transform.position - transform.position).normalized;
+        gruntDirVec = dirToTarget - (Vector2)transform.position;
+
         WeaponTransform.transform.right = (Vector3)gruntDirVec.normalized;
+
+        Vector3 scale = transform.localScale;
+        Vector3 position = transform.localPosition;
+        Vector3 rotation = transform.localEulerAngles;
+
+        if (render.flipX)
+        {
+            scale.y = -1;
+
+            position.x = (float)-0.5;
+            position.y = 0;
+            position.z = 0;
+
+            rotation.x = 0;
+            rotation.y = 0;
+            rotation.z = -130;
+
+
+
+        }
+        else
+        {
+            scale.y = 1;
+
+            position.x = (float)0.5;
+            position.y = 0;
+            position.z = 0;
+
+            rotation.x = 0;
+            rotation.y = 0;
+            rotation.z = -30;
+
+        }
+        WeaponTransform.transform.localScale = scale;
+        WeaponTransform.transform.localPosition = position;
+        WeaponTransform.transform.localEulerAngles = rotation;
+
+
+
+        animator.SetBool("IsAttack", true);
         AttackAbleMove = false;
         yield return new WaitForSeconds(0.8f);
 
-        stateMachine.ChangeState(State.Attack);
+        //// 코루틴이 끝나면 살아있는 상태인 경우에만 공격 실행
+        //if (!isDied)
+        //{
+        //    stateMachine.ChangeState(State.Attack);
+        //}
+        //else
+        //{
+        //    // 죽은 상태이므로 코루틴을 중지
+        //    StopCoroutine(AttackCoroutine());
+        //}
     }
 
 
@@ -518,21 +570,22 @@ public class Grunt : Enemy
 
         public override void Enter()
         {
-            animator.SetBool("IsIdle", false);
-            AttackAbleMove = true;
 
-            CoroutineStarted = false; // Coroutine이 시작되지 않았음을 초기화
 
-            // Coroutine 시작 조건 확인
-            CheckCoroutineStart();
+            if (!playerMover.PlayerDied)
+            {
+                animator.SetBool("IsIdle", false);
+                owner.AttackAbleMove = true;
 
+                CoroutineStarted = false; // Coroutine이 시작되지 않았음을 초기화
+
+                // Coroutine 시작 조건 확인
+                CheckCoroutineStart();
+            }
         }
 
         public override void Update()
         {
-            Vector2 dirToTarget = (target.transform.position - transform.position).normalized;
-
-            gruntDirVec = dirToTarget - (Vector2)transform.position;
 
             owner.AttackTarget();
 
@@ -541,23 +594,24 @@ public class Grunt : Enemy
         }
 
         private void CheckCoroutineStart()
-    
+
         {
             // Coroutine이 시작되지 않았고, 공격 가능 상태이며, 공격 범위 안에 있을 때
-            if (!CoroutineStarted && AttackAbleMove && owner.AttackTarget())
+            if (!CoroutineStarted && owner.AttackAbleMove && owner.AttackTarget())
             {
                 owner.StartCoroutine(owner.AttackCoroutine());
                 CoroutineStarted = true; // Coroutine이 시작되었음을 표시
             }
         }
 
-        
+
         public override void Transition()
         {
-            if (!owner.AttackTarget() && AttackAbleMove)
+            if (!owner.AttackTarget() && owner.AttackAbleMove)
             {
                 animator.SetBool("IsAttack", false);
                 animator.SetBool("IsFollow", true);
+                WeaponAnimator.ResetTrigger("IsSlash");
                 ChangeState(State.Trace);
 
             }

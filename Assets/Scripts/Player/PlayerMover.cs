@@ -42,6 +42,8 @@ public class PlayerMover : MonoBehaviour, IDamagable
 
     private Vector2 moveDir;
 
+    private bool playerDied = false;
+    public bool PlayerDied {  get { return playerDied; } }
 
 
 
@@ -248,23 +250,21 @@ public class PlayerMover : MonoBehaviour, IDamagable
     }
 
 
-    private bool isDied;
 
     public virtual void Died()
     {
         Debug.Log("플레이어 다이");
 
-    
-        animator.SetBool("IsDied", true);
+        playerDied = true;
+        animator.SetTrigger("IsDied");
+        animator.SetBool("Dead", true);
 
 
+        rigid.AddForce(grunt.GruntDirVec * hitPower, ForceMode2D.Impulse);
+        //rigid.AddForce(Vector2.right * hitPower, ForceMode2D.Impulse);
 
-        if (!isDied)
-        {
-            rigid.AddForce(grunt.GruntDirVec * hitPower, ForceMode2D.Impulse);
-            //hitEffect?.CreateHitEffect();
-            isDied = true;
-        }
+        //hitEffect?.CreateHitEffect();
+
 
         //공격받아서 날라가는 y 최대 속력
 

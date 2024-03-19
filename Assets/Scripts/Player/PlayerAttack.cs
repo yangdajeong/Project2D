@@ -156,8 +156,11 @@ public class PlayerAttack : MonoBehaviour
         int size = Physics2D.OverlapCircleNonAlloc(transform.position, range, colliders, layerMask);
         for (int i = 0; i < size; i++) 
         {
-            // 카메라를 흔들도록 ShakeCamera에 흔들림 명령을 내립니다.
-            shakeCamera.Shake();
+
+            if (!grunt.IsDied)
+            {
+                shakeCamera.Shake();
+            }
 
             //시야각
             Vector2 dirToTarget = (colliders[i].transform.position - transform.position).normalized;
