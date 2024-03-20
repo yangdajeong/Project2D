@@ -7,6 +7,9 @@ public class Grunt : Enemy
 {
     public enum State { Idle, Walk, Trace, Return, Attack, Died }
 
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip gruntAttackSound;
+
     [Header("Component")]
     [SerializeField] Animator animator;
     [SerializeField] Transform WalkPosStart;
@@ -93,6 +96,11 @@ public class Grunt : Enemy
         hitEffect.GrundCreateHitEffect();
 
         shakeCamera.Shake();
+
+        if (!IsDied && gruntAttackSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(gruntAttackSound);
+        }
 
 
 
@@ -555,6 +563,9 @@ public class Grunt : Enemy
         //    // 죽은 상태이므로 코루틴을 중지
         //    StopCoroutine(AttackCoroutine());
         //}
+
+        // 그런트가 플레이어를 때릴 때 사운드 재생
+
     }
 
 

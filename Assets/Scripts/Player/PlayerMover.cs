@@ -6,6 +6,13 @@ using UnityEngine.InputSystem;
 
 public class PlayerMover : MonoBehaviour, IDamagable
 {
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip wallJumpSound;
+    [SerializeField] AudioSource audioSource2;
+    [SerializeField] AudioClip rollSound;
+
+
+
     [Header("Component")]
     [SerializeField] Rigidbody2D rigid;
     [SerializeField] SpriteRenderer render;
@@ -163,6 +170,8 @@ public class PlayerMover : MonoBehaviour, IDamagable
         }
 
         animator.SetFloat("YSpeed", rigid.velocity.y);
+
+
     }
 
     private void Jump()
@@ -176,6 +185,12 @@ public class PlayerMover : MonoBehaviour, IDamagable
     {
         rigid.velocity = new Vector2(-isRight * wallJumpPower, 0.9f * wallJumpPower);
         FlipPlayer();
+
+        // 벽을 탈 때 소리 재생
+        if (wallJumpSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(wallJumpSound);
+        }
     }
 
     private void FlipPlayer()
@@ -189,6 +204,12 @@ public class PlayerMover : MonoBehaviour, IDamagable
 
         animator.SetBool("IsRoll", true);
         StartCoroutine(StopRoll());
+
+        // 구를 때 소리 재생
+        if (rollSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(rollSound);
+        }
     }
 
     private IEnumerator StopRoll()

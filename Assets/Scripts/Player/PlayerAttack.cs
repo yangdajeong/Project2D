@@ -6,6 +6,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerAttack : MonoBehaviour
 {
+    [Header("Audio")]
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip gruntAttackSound;
+
     [Header("Component")]
     [SerializeField] Animator WeaponAnimator;
     [SerializeField] Animator PlayerAnimator;
@@ -174,7 +178,15 @@ public class PlayerAttack : MonoBehaviour
             IDamagable damagable = colliders[i].GetComponent<IDamagable>();
             damagable?.Died();
 
-            
+            // 그런트를 때릴 때 사운드 재생
+            if (damagable is Grunt)
+            {
+                if (gruntAttackSound != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(gruntAttackSound);
+                }
+            }
+
         }
     
     }
