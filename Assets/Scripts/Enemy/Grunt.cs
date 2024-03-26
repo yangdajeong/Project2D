@@ -47,7 +47,7 @@ public class Grunt : Enemy
     private float currentAngle;
     private Vector2 gruntDirVec;
     public Vector2 GruntDirVec { get { return gruntDirVec; } }
-    private  bool isDied;
+    private bool isDied;
     public bool IsDied { get { return isDied; } }
 
 
@@ -86,35 +86,128 @@ public class Grunt : Enemy
         return hit.collider != null;
     }
 
+
+    private void Update()
+    {
+        Debug.Log(playerMover.PlayerDied);
+    }
     private void AttackEffectTiming()
     {
-        WeaponAnimator.SetTrigger("IsSlash");
+        if (playerMover.PlayerDied)
+        {
+            WeaponAnimator.SetTrigger("IsSlash");
+        }
     }
+
+    //private Collider2D[] AttackTarget()
+    //{
+    //    Collider2D[] targetsInView = Physics2D.OverlapCircleAll(transform.position, AttackRange, layerMask);
+    //    return targetsInView;
+    //}
 
     private void AttackTiming()
     {
-        hitEffect.GrundCreateHitEffect();
+        Collider2D[] colliders = AttackTarget();
 
-        shakeCamera.Shake();
-
-        if (!IsDied && gruntAttackSound != null && audioSource != null)
+        foreach (Collider2D collider in colliders)
         {
-            audioSource.PlayOneShot(gruntAttackSound);
+            Debug.Log(colliders.Length);
+
+            IDamagable damagable = collider.GetComponent<IDamagable>();
+            if (damagable != null)
+            {
+                damagable?.Died();
+                Debug.Log("그런트가 플레이어 죽임");
+            }
+
+            hitEffect.GrundCreateHitEffect();
+
+            shakeCamera.Shake();
+
+            if (!IsDied && gruntAttackSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(gruntAttackSound);
+            }
         }
 
 
+        //GameObject playerObject = GameObject.FindGameObjectWithTag("Player"); // "Player" 태그로 플레이어를 찾음
 
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player"); // "Player" 태그로 플레이어를 찾음
+        //if (playerObject != null)
+        //{
+        //    IDamagable damagable = playerObject.GetComponent<IDamagable>(); // 플레이어의 IDamagable 컴포넌트를 가져옴
 
-        if (playerObject != null)
-        {
-            IDamagable damagable = playerObject.GetComponent<IDamagable>(); // 플레이어의 IDamagable 컴포넌트를 가져옴
+        //    damagable?.Died();
 
-            damagable?.Died();
-
-        }
+        //}
 
     }
+
+    private Collider2D[] AttackTarget()
+    {
+        List<Collider2D> targetsList = new List<Collider2D>(); // 콜라이더 리스트 생성
+
+        Collider2D[] targetsInView = Physics2D.OverlapCircleAll(transform.position, AttackRange, layerMask);
+
+        foreach (Collider2D targetInView in targetsInView)
+        {
+            Vector2 dirToTarget = (targetInView.transform.position - transform.position).normalized;
+            // 그런트가 플립되었을 때 시야각도 플립
+            Vector2 referenceDir = render.flipX ? -transform.right : transform.right;
+
+            float angleToTarget = Vector2.Angle(referenceDir, dirToTarget);
+
+            if (angleToTarget <= angle) // 시야각 내에 있는지 확인
+            {
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToTarget, AttackRange, obstacleMask);
+                if (hit.collider == null || hit.collider.gameObject == targetInView.gameObject) // 장애물이 없는지 확인
+                {
+                    Debug.DrawRay(transform.position, dirToTarget * range, Color.red);
+                    targetsList.Add(targetInView); // 콜라이더를 리스트에 추가
+                }
+            }
+        }
+
+        return targetsList.ToArray(); // 리스트를 배열로 변환하여 반환
+    }
+
+    //private bool AttackTarget()
+    //{
+
+    //    Collider2D[] targetsInView = Physics2D.OverlapCircleAll(transform.position, AttackRange, layerMask);
+
+
+    //    foreach (Collider2D targetInView in targetsInView)
+    //    {
+    //        Vector2 dirToTarget = (targetInView.transform.position - transform.position).normalized;
+    //        //그런트가 플립되었을때 시야각도 플립
+    //        Vector2 referenceDir = render.flipX ? -transform.right : transform.right;
+
+    //        float angleToTarget = Vector2.Angle(referenceDir, dirToTarget);
+
+    //        if (angleToTarget <= angle) // 시야각 내에 있는지 확인
+    //        {
+    //            RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToTarget, AttackRange, obstacleMask);
+    //            if (hit.collider == null || hit.collider.gameObject == targetInView.gameObject) // 장애물이 없는지 확인
+    //            {
+    //                Debug.DrawRay(transform.position, dirToTarget * range, Color.red);
+    //                return true;
+    //            }
+    //        }
+
+    //    }
+
+
+
+    //    // 그런트의 시야각을 계산한 후 필드에 저장
+    //    currentAngle = angle;
+    //    if (render.flipX)
+    //    {
+    //        currentAngle *= -1;
+    //    }
+
+    //    return false;
+    //}
 
 
     private bool FindTarget()
@@ -143,9 +236,6 @@ public class Grunt : Enemy
 
         }
 
-
-
-
         // 그런트의 시야각을 계산한 후 필드에 저장
         currentAngle = angle;
         if (render.flipX)
@@ -157,43 +247,6 @@ public class Grunt : Enemy
     }
 
 
-    private bool AttackTarget()
-    {
-
-        Collider2D[] targetsInView = Physics2D.OverlapCircleAll(transform.position, AttackRange, layerMask);
-
-
-        foreach (Collider2D targetInView in targetsInView)
-        {
-            Vector2 dirToTarget = (targetInView.transform.position - transform.position).normalized;
-            //그런트가 플립되었을때 시야각도 플립
-            Vector2 referenceDir = render.flipX ? -transform.right : transform.right;
-
-            float angleToTarget = Vector2.Angle(referenceDir, dirToTarget);
-
-            if (angleToTarget <= angle) // 시야각 내에 있는지 확인
-            {
-                RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToTarget, AttackRange, obstacleMask);
-                if (hit.collider == null || hit.collider.gameObject == targetInView.gameObject) // 장애물이 없는지 확인
-                {
-                    Debug.DrawRay(transform.position, dirToTarget * range, Color.red);
-                    return true;
-                }
-            }
-
-        }
-
-
-
-        // 그런트의 시야각을 계산한 후 필드에 저장
-        currentAngle = angle;
-        if (render.flipX)
-        {
-            currentAngle *= -1;
-        }
-
-        return false;
-    }
 
     private void OnDrawGizmosSelected()
     {
@@ -333,11 +386,16 @@ public class Grunt : Enemy
                 ChangeState(State.Trace);
             }
 
-            else if (owner.AttackTarget())
+            else
             {
-                animator.SetBool("IsIdle", false);
-                ChangeState(State.Attack);
+                Collider2D[] targetsInView = owner.AttackTarget();
+                if (targetsInView.Length > 0)
+                {
+                    owner.animator.SetBool("IsIdle", false);
+                    ChangeState(State.Attack);
 
+
+                }
             }
         }
     }
@@ -425,12 +483,16 @@ public class Grunt : Enemy
                 ChangeState(State.Idle);
 
             }
-            else if (owner.AttackTarget())
+            else
             {
-                //공격 범위
-                animator.SetBool("IsFollow", false);
-                ChangeState(State.Attack);
+                Collider2D[] targetsInView = owner.AttackTarget();
+                if (targetsInView.Length > 0)
+                {
+                    animator.SetBool("IsFollow", false);
+                    ChangeState(State.Attack);
 
+
+                }
             }
         }
 
@@ -552,19 +614,7 @@ public class Grunt : Enemy
         animator.SetBool("IsAttack", true);
         AttackAbleMove = false;
         yield return new WaitForSeconds(0.8f);
-
-        //// 코루틴이 끝나면 살아있는 상태인 경우에만 공격 실행
-        //if (!isDied)
-        //{
-        //    stateMachine.ChangeState(State.Attack);
-        //}
-        //else
-        //{
-        //    // 죽은 상태이므로 코루틴을 중지
-        //    StopCoroutine(AttackCoroutine());
-        //}
-
-        // 그런트가 플레이어를 때릴 때 사운드 재생
+        stateMachine.ChangeState(State.Attack);
 
     }
 
@@ -608,7 +658,7 @@ public class Grunt : Enemy
 
         {
             // Coroutine이 시작되지 않았고, 공격 가능 상태이며, 공격 범위 안에 있을 때
-            if (!CoroutineStarted && owner.AttackAbleMove && owner.AttackTarget())
+            if (!CoroutineStarted && owner.AttackAbleMove && owner.AttackTarget().Length > 0)
             {
                 owner.StartCoroutine(owner.AttackCoroutine());
                 CoroutineStarted = true; // Coroutine이 시작되었음을 표시
@@ -618,7 +668,7 @@ public class Grunt : Enemy
 
         public override void Transition()
         {
-            if (!owner.AttackTarget() && owner.AttackAbleMove)
+            if (owner.AttackTarget().Length == 0 && owner.AttackAbleMove)
             {
                 animator.SetBool("IsAttack", false);
                 animator.SetBool("IsFollow", true);
